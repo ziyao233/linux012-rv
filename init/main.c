@@ -151,6 +151,8 @@ void main(void)		/* This really IS void, no error here. */
 	main_memory_start += rd_init(main_memory_start, RAMDISK*1024);
 #endif
 	mem_init(main_memory_start,memory_end);
+	while (1) ;
+#if 0
 	trap_init();
 	blk_dev_init();
 	chr_dev_init();
@@ -174,6 +176,7 @@ void main(void)		/* This really IS void, no error here. */
  */
 	for(;;)
 		__asm__("int $0x80"::"a" (__NR_pause):"ax");
+#endif
 }
 
 static int printf(const char *fmt, ...)
@@ -187,6 +190,7 @@ static int printf(const char *fmt, ...)
 	return i;
 }
 
+#if 0
 void init(void)
 {
 	int pid,i;
@@ -229,3 +233,4 @@ void init(void)
 	}
 	_exit(0);	/* NOTE! _exit, not exit() */
 }
+#endif
