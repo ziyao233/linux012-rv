@@ -31,7 +31,11 @@ QFLAGS		= -bios none -kernel kernel.elf -m 128M -nographic	\
 #
 ROOT_DEV	= /dev/hd6
 SWAP_DEV	= /dev/hd2
-SRCS		= boot/setup.S init/main.c mm/memory.c
+BOOT_SRC	= boot/setup.S
+INIT_SRC	= init/main.c
+MM_SRC		= mm/memory.c
+KERNEL_SRC	= kernel/printk.c kernel/chr_drv/console.c
+SRCS		= $(BOOT_SRC) $(MM_SRC) $(KERNEL_SRC) $(INIT_SRC)
 OBJS		= $(patsubst %.S, %.o, $(patsubst %.c, %.o, $(SRCS)))
 
 .S.o:
@@ -47,10 +51,6 @@ kernel: $(OBJS)
 clean:
 	-rm $(OBJS)
 
-dep dep.mk: $(SRC)
-	@echo Generating dep.mk
-	@$(CC) $(CFLAGS) -MM $(SRCS) > dep.mk
-
 run: kernel
 	@echo "Type ^A then x to exit QEMU"
 	@$(QEMU) $(QFLAGS)
@@ -59,5 +59,3 @@ debug: kernel
 	@echo "Type ^A then x to exit QEMU"
 	@echo 'Type "target remote localhost:1234" in gdb(-multiarch) to debug'
 	@$(QEMU) $(QFLAGS) -S -s
-
-include dep.mk

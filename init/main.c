@@ -45,7 +45,6 @@ static inline _syscall0(int,sync)
 // static char printbuf[1024];
 
 extern char *strcpy();
-extern int vsprintf();
 extern void init(void);
 extern void blk_dev_init(void);
 extern void chr_dev_init(void);
@@ -54,17 +53,6 @@ extern void floppy_init(void);
 extern void mem_init(long start, long end);
 extern long rd_init(long mem_start, int length);
 extern long kernel_mktime(struct tm * tm);
-
-static int sprintf(char * str, const char *fmt, ...)
-{
-	va_list args;
-	int i;
-
-	va_start(args, fmt);
-	i = vsprintf(str, fmt, args);
-	va_end(args);
-	return i;
-}
 
 /*
  * This is set up by the setup-routine at boot-time
@@ -147,7 +135,7 @@ int main(void)		/* This really IS void, no error here. */
 	main_memory_start += rd_init(main_memory_start, RAMDISK*1024);
 #endif
 	mem_init(main_memory_start,memory_end);
-	while (1) ;
+	printk("Memory initialised");
 #if 0
 	trap_init();
 	blk_dev_init();
@@ -173,6 +161,7 @@ int main(void)		/* This really IS void, no error here. */
 	for(;;)
 		__asm__("int $0x80"::"a" (__NR_pause):"ax");
 #endif
+	while (1) ;
 	return 0;		// Never reaches here
 }
 

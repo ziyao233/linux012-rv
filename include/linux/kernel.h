@@ -1,3 +1,5 @@
+#include<stdarg.h>
+#include<stddef.h>
 /*
  * 'kernel.h' contains some often-used function prototypes etc
  */
@@ -5,7 +7,7 @@ void verify_area(void * addr,int count);
 void panic(const char * str);
 void do_exit(long error_code);
 int printf(const char * fmt, ...);
-int printk(const char * fmt, ...);
+size_t printk(const char * fmt, ...);
 void console_print(const char * str);
 int tty_write(unsigned ch,char * buf,int count);
 void * malloc(unsigned int size);
@@ -14,6 +16,8 @@ extern void hd_times_out(void);
 extern void sysbeepstop(void);
 extern void blank_screen(void);
 extern void unblank_screen(void);
+size_t vsprintf(char *buf, const char *fmt, va_list args);
+size_t sprintf(char *buf, const char *fmt, ...);
 
 extern int beepcount;
 extern int hd_timeout;

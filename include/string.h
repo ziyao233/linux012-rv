@@ -24,7 +24,7 @@ extern char * strerror(int errno);
  *		(C) 1991 Linus Torvalds
  */
  
-extern inline char * strcpy(char * dest, const char *src)
+static inline char * strcpy(char * dest, const char *src)
 {
 	char *t = dest;
 	while (*src)
@@ -33,7 +33,7 @@ extern inline char * strcpy(char * dest, const char *src)
 	return t;
 }
 
-extern inline char * strncpy(char * dest, const char *src, int count)
+static inline char * strncpy(char * dest, const char *src, int count)
 {
 	char *t = dest;
 	while (*src) {
@@ -46,7 +46,7 @@ end:
 	return t;
 }
 
-extern inline char * strcat(char * dest,const char * src)
+static inline char * strcat(char * dest,const char * src)
 {
 	char *t = dest;
 	while (*dest)
@@ -57,7 +57,7 @@ extern inline char * strcat(char * dest,const char * src)
 	return t;
 }
 
-extern inline char * strncat(char * dest,const char * src,int count)
+static inline char * strncat(char * dest,const char * src,int count)
 {
 	char *t = dest;
 	while (*dest)
@@ -73,7 +73,7 @@ end:
 	return t;
 }
 
-extern inline int strcmp(const char * cs,const char * ct)
+static inline int strcmp(const char * cs,const char * ct)
 {
 	while (*cs || *ct) {
 		if (*cs != *ct)
@@ -84,7 +84,7 @@ extern inline int strcmp(const char * cs,const char * ct)
 	return 0;
 }
 
-extern inline int strncmp(const char * cs,const char * ct,int count)
+static inline int strncmp(const char * cs,const char * ct,int count)
 {
 	while ((*cs || *ct) && (count--)) {
 		count--;
@@ -96,14 +96,14 @@ extern inline int strncmp(const char * cs,const char * ct,int count)
 	return 0;
 }
 
-extern inline char * strchr(const char * s,char c)
+static inline char * strchr(const char * s,char c)
 {
 	while (*s && *s != c)
 		s++;
 	return (char*)(*s ? s : NULL);
 }
 
-extern inline char * strrchr(const char * s,char c)
+static inline char * strrchr(const char * s,char c)
 {
 	const char *t = s;
 	while (*s)
@@ -115,7 +115,7 @@ extern inline char * strrchr(const char * s,char c)
 	return (char*)(s > t ? s : NULL);
 }
 
-static int __occur(char c, const char *ct)
+static inline int __occur(char c, const char *ct)
 {
 	for (const char *p = ct; *p; p++) {
 		if (c == *p)
@@ -124,7 +124,7 @@ static int __occur(char c, const char *ct)
 	return 0;
 }
 
-extern inline size_t strspn(const char * cs, const char * ct)
+static inline size_t strspn(const char * cs, const char * ct)
 {
 	const char *t = cs;
 
@@ -133,7 +133,7 @@ extern inline size_t strspn(const char * cs, const char * ct)
 	return cs - t;
 }
 
-extern inline int strcspn(const char * cs, const char * ct)
+static inline int strcspn(const char * cs, const char * ct)
 {
 	const char *t = cs;
 
@@ -142,7 +142,7 @@ extern inline int strcspn(const char * cs, const char * ct)
 	return cs - t;
 }
 
-extern inline char * strpbrk(const char * cs,const char * ct)
+static inline char * strpbrk(const char * cs,const char * ct)
 {
 	while (*cs) {
 		if (__occur(*cs, ct))
@@ -152,7 +152,7 @@ extern inline char * strpbrk(const char * cs,const char * ct)
 	return NULL;
 }
 
-extern inline size_t strlen(const char * s)
+static inline size_t strlen(const char * s)
 {
 	size_t size = 0;
 	while (*(s++))
@@ -162,7 +162,7 @@ extern inline size_t strlen(const char * s)
 
 extern char * ___strtok;
 
-extern inline void * memcpy(void * dest,const void * src, int n)
+static inline void * memcpy(void * dest,const void * src, int n)
 {
 	char *p1 = dest;
 	const char *p2 = src;
@@ -173,12 +173,12 @@ extern inline void * memcpy(void * dest,const void * src, int n)
 	return dest;
 }
 
-extern inline void * memmove(void * dest,const void * src, int n)
+static inline void * memmove(void * dest,const void * src, int n)
 {
 	return memcpy(dest, src, n);
 }
 
-extern inline int memcmp(const void * cs,const void * ct,int count)
+static inline int memcmp(const void * cs,const void * ct,int count)
 {
 	const char *p1 = cs, *p2 = ct;
 	while (count-- && *p1 == *p2) {
@@ -188,7 +188,7 @@ extern inline int memcmp(const void * cs,const void * ct,int count)
 	return *p1 - *p2;
 }
 
-extern inline void * memchr(const void * cs,char c,int count)
+static inline void * memchr(const void * cs,char c,int count)
 {
 	char *p = (char*)cs;
 	while (count-- && *p != c)
@@ -196,7 +196,7 @@ extern inline void * memchr(const void * cs,char c,int count)
 	return *p ? p : NULL;
 }
 
-extern inline void * memset(void * s,char c,int count)
+static inline void * memset(void * s,char c,int count)
 {
 	char *p = s;
 	while (count--)
