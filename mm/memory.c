@@ -46,6 +46,8 @@ __asm__("cld ; rep ; movsl"::"S" (from),"D" (to),"c" (1024):"cx","di","si")
 
 unsigned char mem_map [ PAGING_PAGES ] = {0,};
 
+#if 0
+
 /*
  * Free a page of memory at physical address 'addr'. Used by
  * 'free_page_tables()'
@@ -440,6 +442,8 @@ void do_no_page(unsigned long error_code,unsigned long address)
 	oom();
 }
 
+#endif
+
 void mem_init(long start_mem, long end_mem)
 {
 	int i;
@@ -454,6 +458,7 @@ void mem_init(long start_mem, long end_mem)
 		mem_map[i++]=0;
 }
 
+#if 0
 void show_mem(void)
 {
 	int i,j,k,free=0,total=0;
@@ -500,3 +505,4 @@ void show_mem(void)
 	}
 	printk("Memory found: %d (%d)\n\r",free-shared,total);
 }
+#endif

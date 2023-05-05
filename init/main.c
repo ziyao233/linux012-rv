@@ -134,29 +134,19 @@ int main(void)		/* This really IS void, no error here. */
  * Interrupts are still disabled. Do necessary setups, then
  * enable them
  */
-#if 0
- 	ROOT_DEV = ORIG_ROOT_DEV;
- 	SWAP_DEV = ORIG_SWAP_DEV;
-	sprintf(term, "TERM=con%dx%d", CON_COLS, CON_ROWS);
-	envp[1] = term;	
-	envp_rc[1] = term;
- 	drive_info = DRIVE_INFO;
-	memory_end = (1<<20) + (EXT_MEM_K<<10);
-	memory_end &= 0xfffff000;
-	if (memory_end > 16*1024*1024)
-		memory_end = 16*1024*1024;
-	if (memory_end > 12*1024*1024) 
-		buffer_memory_end = 4*1024*1024;
-	else if (memory_end > 6*1024*1024)
-		buffer_memory_end = 2*1024*1024;
-	else
-		buffer_memory_end = 1*1024*1024;
+// 	ROOT_DEV = ORIG_ROOT_DEV;
+// 	SWAP_DEV = ORIG_SWAP_DEV;
+//	sprintf(term, "TERM=con%dx%d", CON_COLS, CON_ROWS);
+	envp[1]			= term;	
+	envp_rc[1]		= term;
+// 	drive_info		= DRIVE_INFO;
+	memory_end		= 0x81000000;
+	buffer_memory_end	= LOW_MEM;
 	main_memory_start = buffer_memory_end;
 #ifdef RAMDISK
 	main_memory_start += rd_init(main_memory_start, RAMDISK*1024);
 #endif
 	mem_init(main_memory_start,memory_end);
-#endif
 	while (1) ;
 #if 0
 	trap_init();
