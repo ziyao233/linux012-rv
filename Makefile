@@ -31,7 +31,7 @@ QFLAGS		= -bios none -kernel kernel.elf -m 128M -nographic	\
 #
 ROOT_DEV	= /dev/hd6
 SWAP_DEV	= /dev/hd2
-SRCS		= boot/setup.S
+SRCS		= boot/setup.S init/main.c
 OBJS		= $(patsubst %.S, %.o, $(patsubst %.c, %.o, $(SRCS)))
 
 .S.o:

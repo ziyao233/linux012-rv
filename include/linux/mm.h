@@ -17,11 +17,13 @@ extern void free_page(unsigned long addr);
 void swap_free(int page_nr);
 void swap_in(unsigned long *table_ptr);
 
-extern inline volatile void oom(void)
+/*
+extern inline void oom(void)
 {
 	printk("out of memory\n\r");
 	do_exit(SIGSEGV);
 }
+*/
 
 #define invalidate() \
 __asm__("movl %%eax,%%cr3"::"a" (0))

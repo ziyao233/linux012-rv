@@ -2,8 +2,8 @@
  * 'kernel.h' contains some often-used function prototypes etc
  */
 void verify_area(void * addr,int count);
-volatile void panic(const char * str);
-volatile void do_exit(long error_code);
+void panic(const char * str);
+void do_exit(long error_code);
 int printf(const char * fmt, ...);
 int printk(const char * fmt, ...);
 void console_print(const char * str);

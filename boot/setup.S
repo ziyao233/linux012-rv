@@ -23,6 +23,7 @@ _start:
 	blt		t0,		t1,		.clear_bss
 
 	la		sp,		stack
+	j		main
 .park:
 	wfi
 	j		.park
