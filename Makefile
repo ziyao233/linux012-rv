@@ -11,7 +11,7 @@ RELEASE		?= 0
 LD		= $(PREFIX)ld
 LDFLAGS		= -T $(LDSCRIPT)
 CC		= $(PREFIX)gcc $(RAMDISK)
-CFLAGS		= -Wall -O -march=rv64gc -mcmodel=medany	\
+CFLAGS		= -Wall -O0 -g -march=rv64gc -mcmodel=medany	\
 		  -mabi=lp64d -pedantic -Wextra -std=gnu99	\
 		  -nostdinc -Iinclude -fno-builtin
 ifneq ($(RELEASE), 1)
@@ -34,7 +34,8 @@ SWAP_DEV	= /dev/hd2
 BOOT_SRC	= boot/setup.S
 INIT_SRC	= init/main.c
 MM_SRC		= mm/memory.c
-KERNEL_SRC	= kernel/printk.c kernel/chr_drv/console.c
+KERNEL_SRC	= kernel/printk.c kernel/chr_drv/console.c		\
+		  kernel/vsprintf.c
 SRCS		= $(BOOT_SRC) $(MM_SRC) $(KERNEL_SRC) $(INIT_SRC)
 OBJS		= $(patsubst %.S, %.o, $(patsubst %.c, %.o, $(SRCS)))
 

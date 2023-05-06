@@ -32,12 +32,7 @@ static int skip_atoi(const char **s)
 #define SPECIAL	32		/* 0x */
 #define SMALL	64		/* use 'abcdef' instead of 'ABCDEF' */
 
-#define do_div(n,base) ({ \
-int __res; \
-__asm__("divl %4":"=a" (n),"=d" (__res):"0" (n),"1" (0),"r" (base)); \
-__res; })
-
-static char * number(char * str, int num, int base, int size, int precision
+static char * number(char * str, long int num, int base, int size, int precision
 	,int type)
 {
 	char c,sign,tmp[36];
@@ -55,28 +50,37 @@ static char * number(char * str, int num, int base, int size, int precision
 	} else
 		sign=(type&PLUS) ? '+' : ((type&SPACE) ? ' ' : 0);
 	if (sign) size--;
-	if (type&SPECIAL)
+	if (type&SPECIAL) {
 		if (base==16) size -= 2;
 		else if (base==8) size--;
+	}
 	i=0;
-	if (num==0)
+	if (num==0) {
 		tmp[i++]='0';
-	else while (num!=0)
-		tmp[i++]=digits[do_div(num,base)];
-	if (i>precision) precision=i;
+	} else {
+		while (num!=0) {
+			tmp[i++] = digits[num % base];
+			num = num / base;
+		}
+	}
+	if (i>precision)
+		precision=i;
 	size -= precision;
+
 	if (!(type&(ZEROPAD+LEFT)))
 		while(size-->0)
 			*str++ = ' ';
 	if (sign)
 		*str++ = sign;
-	if (type&SPECIAL)
+
+	if (type&SPECIAL) {
 		if (base==8)
 			*str++ = '0';
 		else if (base==16) {
 			*str++ = '0';
 			*str++ = digits[33];
 		}
+	}
 	if (!(type&LEFT))
 		while(size-->0)
 			*str++ = c;
@@ -102,7 +106,6 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 	int field_width;	/* width of output field */
 	int precision;		/* min. # of digits for integers; max
 				   number of chars for from string */
-	int qualifier;		/* 'h', 'l', or 'L' for integer fields */
 
 	for (str=buf ; *fmt ; ++fmt) {
 		if (*fmt != '%') {
@@ -150,11 +153,8 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 		}
 
 		/* get the conversion qualifier */
-		qualifier = -1;
-		if (*fmt == 'h' || *fmt == 'l' || *fmt == 'L') {
-			qualifier = *fmt;
+		if (*fmt == 'h' || *fmt == 'l' || *fmt == 'L')
 			++fmt;
-		}
 
 		switch (*fmt) {
 		case 'c':
@@ -200,6 +200,7 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 
 		case 'x':
 			flags |= SMALL;
+			// fallthrough
 		case 'X':
 			str = number(str, va_arg(args, unsigned long), 16,
 				field_width, precision, flags);
@@ -208,6 +209,7 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 		case 'd':
 		case 'i':
 			flags |= SIGN;
+			// fallthrough
 		case 'u':
 			str = number(str, va_arg(args, unsigned long), 10,
 				field_width, precision, flags);

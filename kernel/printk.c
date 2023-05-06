@@ -16,44 +16,6 @@
 
 static char buf[1024];
 
-size_t vsprintf(char *buf, const char *fmt, va_list args)
-{
-	char *p = buf;
-
-	while (*fmt) {
-		if (*fmt != '%') {
-			*p = *fmt;
-			p++;
-			fmt++;
-			continue;
-		}
-
-		fmt++;
-		if (*fmt == '%') {
-			*p = '%';
-			p++;
-			fmt++;
-		} else if (*fmt == 'd') {
-			int n = va_arg(args, int);
-			int div = 10;
-			while (n / div)
-				div *= 10;
-			div /= 10;
-
-			while (div) {
-				*p = n / div + '0';
-				n %= div;
-				p++;
-			}
-			fmt++;
-		}
-	}
-
-	*p = '\0';
-
-	return p - buf;
-}
-
 size_t sprintf(char *buf, const char *fmt, ...)
 {
 	va_list args;

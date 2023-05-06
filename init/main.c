@@ -135,7 +135,7 @@ int main(void)		/* This really IS void, no error here. */
 	main_memory_start += rd_init(main_memory_start, RAMDISK*1024);
 #endif
 	mem_init(main_memory_start,memory_end);
-	printk("Memory initialised");
+	printk("Memory initialised %d 0x%lX\n", 1, 0x1145141919l);
 #if 0
 	trap_init();
 	blk_dev_init();
