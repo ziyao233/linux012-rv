@@ -136,8 +136,10 @@ int main(void)		/* This really IS void, no error here. */
 #endif
 	mem_init(main_memory_start,memory_end);
 	printk("Memory initialised\n");
-#if 0
 	trap_init();
+	printk("Traps initialised\n");
+	*((char*)NULL) = 0;
+#if 0
 	blk_dev_init();
 	chr_dev_init();
 	tty_init();
