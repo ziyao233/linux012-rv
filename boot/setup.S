@@ -23,7 +23,26 @@ _start:
 	blt		t0,		t1,		.clear_bss
 
 	la		sp,		stack
-	j		main
+
+	csrw		pmpcfg0,	0xf
+	li		t0,		0x3fffffffffffff
+	csrw		pmpaddr0,	t0
+	csrw		satp,		zero
+
+	li		t0,		0xffff
+	csrw		medeleg,	t0
+	csrw		mideleg,	t0
+
+	csrr		t0,		mstatus
+	li		t1,		~(3 << 11)
+	and		t0,		t1,		t0
+	li		t1,		1 << 11
+	or		t0,		t0,		t1
+	csrw		mstatus,	t0
+	la		t0,		main
+	csrw		mepc,		t0
+	mret
+
 .park:
 	wfi
 	j		.park
