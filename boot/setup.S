@@ -9,6 +9,8 @@
 #include <linux/config.h>
 
 	.global		_start
+	.global		pg_dir
+	.global		pg_dir_kernel
 
 _start:
 	csrr		t0,		mhartid
@@ -27,7 +29,32 @@ _start:
 	csrw		pmpcfg0,	0xf
 	li		t0,		0x3fffffffffffff
 	csrw		pmpaddr0,	t0
-	csrw		satp,		zero
+
+	la		t0,		pg_dir
+	la		t1,		pg_dir_kernel
+	srli		t1,		t1,		2
+	or		t1,		t1,		1
+	sd		t1,		16(t0)
+	srli		t0,		t0,		12
+	li		t1,		1
+	slli		t1,		t1,		63
+	or		t0,		t1,		t0
+
+	la		t0,		pg_dir
+	li		t1,		0x8001e000
+	li		t2,		8192
+.copy_page_table:
+	ld		t3,		0(t0)
+	sd		t3,		0(t1)
+	addi		t0,		t0,		8
+	addi		t1,		t1,		8
+	addi		t2,		t2,		-8
+	bnez		t2,		.copy_page_table
+
+	li		t0,		0x8001e000
+	sfence.vma
+	csrw		satp,		t0
+	sfence.vma
 
 	li		t0,		0xffff
 	csrw		medeleg,	t0
@@ -46,6 +73,16 @@ _start:
 .park:
 	wfi
 	j		.park
+
+	.data
+pg_dir:
+	.quad		0x7		// 0 + 1G -> 0
+	.quad		0x10000007	// 0x40000000 + 1G -> 0x40000000
+	.quad		0		// 0x80000000 + 1G
+	.zero		4096 - 3 * 8
+pg_dir_kernel:
+	.quad		0x2000000f	// 0x80000000 + 2MB -> 0x80000000
+	.zero		4096 - 8
 
 	.bss
 stack:	.skip		4096
