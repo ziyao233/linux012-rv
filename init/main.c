@@ -103,9 +103,9 @@ static void time_init(void)
 
 #endif
 
-static long memory_end = 0;
-static long buffer_memory_end = 0;
-static long main_memory_start = 0;
+static long memory_end = 0x81200000;
+// static long buffer_memory_end = 0;
+static long main_memory_start = 0x80200000;
 static char term[32];
 
 // static char * argv_rc[] = { "/bin/sh", NULL };
@@ -128,9 +128,6 @@ int main(void)		/* This really IS void, no error here. */
 	envp[1]			= term;	
 	envp_rc[1]		= term;
 // 	drive_info		= DRIVE_INFO;
-	memory_end		= 0x81000000;
-	buffer_memory_end	= LOW_MEM;
-	main_memory_start = buffer_memory_end;
 #ifdef RAMDISK
 	main_memory_start += rd_init(main_memory_start, RAMDISK*1024);
 #endif

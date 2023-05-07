@@ -31,17 +31,7 @@ _start:
 	csrw		pmpaddr0,	t0
 
 	la		t0,		pg_dir
-	la		t1,		pg_dir_kernel
-	srli		t1,		t1,		2
-	or		t1,		t1,		1
-	sd		t1,		16(t0)
-	srli		t0,		t0,		12
-	li		t1,		1
-	slli		t1,		t1,		63
-	or		t0,		t1,		t0
-
-	la		t0,		pg_dir
-	li		t1,		0x8001e000
+	li		t1,		0x801fe000
 	li		t2,		8192
 .copy_page_table:
 	ld		t3,		0(t0)
@@ -51,7 +41,7 @@ _start:
 	addi		t2,		t2,		-8
 	bnez		t2,		.copy_page_table
 
-	li		t0,		0x8001e000
+	li		t0,		0x80000000000801fe
 	sfence.vma
 	csrw		satp,		t0
 	sfence.vma
@@ -78,11 +68,13 @@ _start:
 pg_dir:
 	.quad		0x7		// 0 + 1G -> 0
 	.quad		0x10000007	// 0x40000000 + 1G -> 0x40000000
-	.quad		0		// 0x80000000 + 1G
+	.quad		0x2007fc01	// 0x80000000 + 1G dir: 0x801f0000
 	.zero		4096 - 3 * 8
 pg_dir_kernel:
 	.quad		0x2000000f	// 0x80000000 + 2MB -> 0x80000000
 	.zero		4096 - 8
 
 	.bss
-stack:	.skip		4096
+	.align		16
+	.skip 4096
+stack:
