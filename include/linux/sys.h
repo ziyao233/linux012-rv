@@ -90,6 +90,8 @@ extern int sys_lstat();
 extern int sys_readlink();
 extern int sys_uselib();
 
+#if 0
+
 fn_ptr sys_call_table[] = { sys_setup, sys_exit, sys_fork, sys_read,
 sys_write, sys_open, sys_close, sys_waitpid, sys_creat, sys_link,
 sys_unlink, sys_execve, sys_chdir, sys_time, sys_mknod, sys_chmod,
@@ -107,5 +109,7 @@ sys_setrlimit, sys_getrlimit, sys_getrusage, sys_gettimeofday,
 sys_settimeofday, sys_getgroups, sys_setgroups, sys_select, sys_symlink,
 sys_lstat, sys_readlink, sys_uselib };
 
+
 /* So we don't have to do any more manual updating.... */
 int NR_syscalls = sizeof(sys_call_table)/sizeof(fn_ptr);
+#endif

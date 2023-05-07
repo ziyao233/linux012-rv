@@ -138,13 +138,13 @@ int main(void)		/* This really IS void, no error here. */
 	printk("Memory initialised\n");
 	trap_init();
 	printk("Traps initialised\n");
-	*((char*)NULL) = 0;
+	sched_init();
+	printk("Scheduler initialised\n");
 #if 0
 	blk_dev_init();
 	chr_dev_init();
 	tty_init();
 	time_init();
-	sched_init();
 	buffer_init(buffer_memory_end);
 	hd_init();
 	floppy_init();

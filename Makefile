@@ -34,8 +34,9 @@ SWAP_DEV	= /dev/hd2
 BOOT_SRC	= boot/setup.S
 INIT_SRC	= init/main.c
 MM_SRC		= mm/memory.c
-KERNEL_SRC	= kernel/printk.c kernel/chr_drv/console.c		\
-		  kernel/vsprintf.c kernel/traps.c kernel/entry.S
+KERNEL_SRC	= kernel/printk.c kernel/chr_drv/console.c
+KERNEL_SRC     += kernel/vsprintf.c kernel/traps.c kernel/entry.S
+KERNEL_SRC     += kernel/sched.c kernel/panic.c
 SRCS		= $(BOOT_SRC) $(MM_SRC) $(KERNEL_SRC) $(INIT_SRC)
 OBJS		= $(patsubst %.S, %.o, $(patsubst %.c, %.o, $(SRCS)))
 

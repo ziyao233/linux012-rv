@@ -4,7 +4,7 @@
 #include <sys/types.h>
 
 typedef int sig_atomic_t;
-typedef unsigned int sigset_t;		/* 32 bits */
+typedef unsigned long int sigset_t;		/* 64 bits */
 
 #define _NSIG             32
 #define NSIG		_NSIG
@@ -55,7 +55,7 @@ typedef unsigned int sigset_t;		/* 32 bits */
 struct sigaction {
 	void (*sa_handler)(int);
 	sigset_t sa_mask;
-	int sa_flags;
+	unsigned long int sa_flags;
 	void (*sa_restorer)(void);
 };
 

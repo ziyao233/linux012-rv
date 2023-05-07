@@ -15,8 +15,6 @@
 #include <linux/sys.h>
 #include <linux/fdreg.h>
 #include <asm/system.h>
-#include <asm/io.h>
-#include <asm/segment.h>
 
 #include <signal.h>
 
@@ -85,26 +83,6 @@ struct {
 	long * a;
 	short b;
 	} stack_start = { & user_stack [PAGE_SIZE>>2] , 0x10 };
-/*
- *  'math_state_restore()' saves the current math information in the
- * old math state array, and gets the new ones from the current task
- */
-void math_state_restore()
-{
-	if (last_task_used_math == current)
-		return;
-	__asm__("fwait");
-	if (last_task_used_math) {
-		__asm__("fnsave %0"::"m" (last_task_used_math->tss.i387));
-	}
-	last_task_used_math=current;
-	if (current->used_math) {
-		__asm__("frstor %0"::"m" (current->tss.i387));
-	} else {
-		__asm__("fninit"::);
-		current->used_math=1;
-	}
-}
 
 /*
  *  'schedule()' is the scheduler function. This is GOOD CODE! There
@@ -158,7 +136,7 @@ void schedule(void)
 				(*p)->counter = ((*p)->counter >> 1) +
 						(*p)->priority;
 	}
-	switch_to(next);
+	switch_to(&current->context, &task[next]->context);
 }
 
 int sys_pause(void)
@@ -187,7 +165,7 @@ repeat:	schedule();
 	}
 	if (!*p)
 		printk("Warning: *P = NULL\n\r");
-	if (*p = tmp)
+	if ((*p = tmp))
 		tmp->state=0;
 }
 
@@ -211,6 +189,8 @@ void wake_up(struct task_struct **p)
 		(**p).state=0;
 	}
 }
+
+#if 0
 
 /*
  * OK, here are some floppy things that shouldn't be in the kernel
@@ -280,6 +260,8 @@ void do_floppy_timer(void)
 	}
 }
 
+#endif
+
 #define TIME_REQUESTS 64
 
 static struct timer_list {
@@ -323,6 +305,7 @@ void add_timer(long jiffies, void (*fn)(void))
 
 void do_timer(long cpl)
 {
+#if 0
 	static int blanked = 0;
 
 	if (blankcount || !blankinterval) {
@@ -343,6 +326,7 @@ void do_timer(long cpl)
 		if (!--beepcount)
 			sysbeepstop();
 
+#endif
 	if (cpl)
 		current->utime++;
 	else
@@ -359,8 +343,6 @@ void do_timer(long cpl)
 			(fn)();
 		}
 	}
-	if (current_DOR & 0xf0)
-		do_floppy_timer();
 	if ((--current->counter)>0) return;
 	current->counter=0;
 	if (!cpl) return;
@@ -417,28 +399,9 @@ int sys_nice(long increment)
 void sched_init(void)
 {
 	int i;
-	struct desc_struct * p;
 
-	if (sizeof(struct sigaction) != 16)
-		panic("Struct sigaction MUST be 16 bytes");
-	set_tss_desc(gdt+FIRST_TSS_ENTRY,&(init_task.task.tss));
-	set_ldt_desc(gdt+FIRST_LDT_ENTRY,&(init_task.task.ldt));
-	p = gdt+2+FIRST_TSS_ENTRY;
-	for(i=1;i<NR_TASKS;i++) {
+	if (sizeof(struct sigaction) != 32)
+		panic("Struct sigaction MUST be 32 bytes");
+	for(i=1;i<NR_TASKS;i++)
 		task[i] = NULL;
-		p->a=p->b=0;
-		p++;
-		p->a=p->b=0;
-		p++;
-	}
-/* Clear NT, so that we won't have troubles with that later on */
-	__asm__("pushfl ; andl $0xffffbfff,(%esp) ; popfl");
-	ltr(0);
-	lldt(0);
-	outb_p(0x36,0x43);		/* binary, mode 3, LSB/MSB, ch 0 */
-	outb_p(LATCH & 0xff , 0x40);	/* LSB */
-	outb(LATCH >> 8 , 0x40);	/* MSB */
-	set_intr_gate(0x20,&timer_interrupt);
-	outb(inb_p(0x21)&~0x01,0x21);
-	set_system_gate(0x80,&system_call);
 }
