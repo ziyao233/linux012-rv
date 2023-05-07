@@ -20,7 +20,6 @@
 
 #include <linux/sched.h>
 #include <linux/tty.h>
-#include <asm/segment.h>
 #include <asm/system.h>
 
 int kill_pg(int pgrp, int sig, int priv);
@@ -86,7 +85,7 @@ struct tty_queue * table_list[]={
 
 void change_console(unsigned int new_console)
 {
-	if (new_console == fg_console || new_console >= NR_CONSOLES)
+	if ((int)new_console == fg_console || (int)new_console >= NR_CONSOLES)
 		return;
 	fg_console = new_console;
 	table_list[0] = con_queues + 0 + fg_console*3;
@@ -192,18 +191,20 @@ void copy_to_cooked(struct tty_struct * tty)
 		if (L_ISIG(tty)) {
 			if ((INTR_CHAR(tty) != _POSIX_VDISABLE) &&
 			    (c==INTR_CHAR(tty))) {
-				kill_pg(tty->pgrp, SIGINT, 1);
+				// kill_pg(tty->pgrp, SIGINT, 1);
 				continue;
 			}
 			if ((QUIT_CHAR(tty) != _POSIX_VDISABLE) &&
 			    (c==QUIT_CHAR(tty))) {
-				kill_pg(tty->pgrp, SIGQUIT, 1);
+				// kill_pg(tty->pgrp, SIGQUIT, 1);
 				continue;
 			}
 			if ((SUSPEND_CHAR(tty) != _POSIX_VDISABLE) &&
 			    (c==SUSPEND_CHAR(tty))) {
+#if 0
 				if (!is_orphaned_pgrp(tty->pgrp))
 					kill_pg(tty->pgrp, SIGTSTP, 1);
+#endif
 				continue;
 			}
 		}
@@ -245,17 +246,22 @@ void copy_to_cooked(struct tty_struct * tty)
  */
 int tty_signal(int sig, struct tty_struct *tty)
 {
+#if 0
 	if (is_orphaned_pgrp(current->pgrp))
 		return -EIO;		/* don't stop an orphaned pgrp */
 	(void) kill_pg(current->pgrp,sig,1);
 	if ((current->blocked & (1<<(sig-1))) ||
-	    ((int) current->sigaction[sig-1].sa_handler == 1)) 
+	    ((unsigned long int) current->sigaction[sig-1].sa_handler == 1)) 
 		return -EIO;		/* Our signal will be ignored */
 	else if (current->sigaction[sig-1].sa_handler)
 		return -EINTR;		/* We _will_ be interrupted :-) */
 	else
 		return -ERESTARTSYS;	/* We _will_ be interrupted :-) */
 					/* (but restart after we continue) */
+#endif
+	(void)sig;
+	(void)tty;
+	return 0;
 }
 
 int tty_read(unsigned channel, char * buf, int nr)
@@ -267,10 +273,10 @@ int tty_read(unsigned channel, char * buf, int nr)
 
 	if (channel > 255)
 		return -EIO;
-	tty = TTY_TABLE(channel);
+	tty = TTY_TABLE((int)channel);
 	if (!(tty->write_q || tty->read_q || tty->secondary))
 		return -EIO;
-	if ((current->tty == channel) && (tty->pgrp != current->pgrp)) 
+	if ((current->tty == (int)channel) && (tty->pgrp != current->pgrp)) 
 		return(tty_signal(SIGTTIN, tty));
 	if (channel & 0x80)
 		other_tty = tty_table + (channel ^ 0x40);
@@ -317,7 +323,7 @@ int tty_read(unsigned channel, char * buf, int nr)
 			     c==EOF_CHAR(tty)) && L_CANON(tty))
 				break;
 			else {
-				put_fs_byte(c,b++);
+				*(b++) = c;
 				if (!--nr)
 					break;
 			}
@@ -338,24 +344,24 @@ int tty_read(unsigned channel, char * buf, int nr)
 
 int tty_write(unsigned channel, char * buf, int nr)
 {
-	static cr_flag=0;
+	static int cr_flag=0;
 	struct tty_struct * tty;
 	char c, *b=buf;
 
 	if (channel > 255)
 		return -EIO;
-	tty = TTY_TABLE(channel);
+	tty = TTY_TABLE((int)channel);
 	if (!(tty->write_q || tty->read_q || tty->secondary))
 		return -EIO;
 	if (L_TOSTOP(tty) && 
-	    (current->tty == channel) && (tty->pgrp != current->pgrp)) 
+	    (current->tty == (int)channel) && (tty->pgrp != current->pgrp)) 
 		return(tty_signal(SIGTTOU, tty));
 	while (nr>0) {
 		sleep_if_full(tty->write_q);
 		if (current->signal & ~current->blocked)
 			break;
 		while (nr>0 && !FULL(tty->write_q)) {
-			c=get_fs_byte(b);
+			c = *b;
 			if (O_POST(tty)) {
 				if (c=='\r' && O_CRNL(tty))
 					c='\n';
@@ -446,7 +452,7 @@ void tty_init(void)
 			0,
 			0,
 			0,
-			rs_write,
+			NULL, // rs_write,
 			rs_queues+0+i*3,rs_queues+1+i*3,rs_queues+2+i*3
 		};
 	}
@@ -461,7 +467,7 @@ void tty_init(void)
 			0,
 			0,
 			0,
-			mpty_write,
+			NULL, // mpty_write,
 			mpty_queues+0+i*3,mpty_queues+1+i*3,mpty_queues+2+i*3
 		};
 		spty_table[i] = (struct tty_struct) {
@@ -474,11 +480,11 @@ void tty_init(void)
 			0,
 			0,
 			0,
-			spty_write,
+			NULL, //spty_write,
 			spty_queues+0+i*3,spty_queues+1+i*3,spty_queues+2+i*3
 		};
 	}
-	rs_init();
+//	rs_init();
 	printk("%d virtual consoles\n\r",NR_CONSOLES);
 	printk("%d pty's\n\r",NR_PTYS);
 }

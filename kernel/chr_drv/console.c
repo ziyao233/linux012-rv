@@ -40,6 +40,8 @@
 #include <string.h>
 #include <errno.h>
 
+int NR_CONSOLES;
+
 #define DEF_TERMIOS \
 (struct termios) { \
 	ICRNL, \
@@ -87,6 +89,7 @@ void con_write(struct tty_struct * tty)
  */
 void con_init(void)
 {
+	NR_CONSOLES = MAX_CONSOLES;
 	return;
 }
 

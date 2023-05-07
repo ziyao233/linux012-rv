@@ -9,8 +9,8 @@
 #ifndef _TTY_H
 #define _TTY_H
 
-#define MAX_CONSOLES	8
-#define NR_SERIALS	2
+#define MAX_CONSOLES	1
+#define NR_SERIALS	1
 #define NR_PTYS		4
 
 extern int NR_CONSOLES;
@@ -41,10 +41,14 @@ struct tty_queue {
 #define LAST(a) ((a)->buf[(TTY_BUF_SIZE-1)&((a)->head-1)])
 #define FULL(a) (!LEFT(a))
 #define CHARS(a) (((a)->head-(a)->tail)&(TTY_BUF_SIZE-1))
-#define GETCH(queue,c) \
-(void)({c=(queue)->buf[(queue)->tail];INC((queue)->tail);})
-#define PUTCH(c,queue) \
-(void)({(queue)->buf[(queue)->head]=(c);INC((queue)->head);})
+#define GETCH(queue,c) do {				\
+	c=(queue)->buf[(queue)->tail];			\
+	INC((queue)->tail);				\
+} while (0)
+#define PUTCH(c,queue) do {				\
+	(queue)->buf[(queue)->head]=(c);		\
+	INC((queue)->head);				\
+} while (0)
 
 #define INTR_CHAR(tty) ((tty)->termios.c_cc[VINTR])
 #define QUIT_CHAR(tty) ((tty)->termios.c_cc[VQUIT])

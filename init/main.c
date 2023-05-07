@@ -140,9 +140,10 @@ int main(void)		/* This really IS void, no error here. */
 	printk("Traps initialised\n");
 	sched_init();
 	printk("Scheduler initialised\n");
+	chr_dev_init();
+	printk("Character devices initialised\n");
 #if 0
 	blk_dev_init();
-	chr_dev_init();
 	tty_init();
 	time_init();
 	buffer_init(buffer_memory_end);
