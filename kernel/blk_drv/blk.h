@@ -38,9 +38,9 @@ struct request {
  * are much more time-critical than writes.
  */
 #define IN_ORDER(s1,s2) \
-((s1)->cmd<(s2)->cmd || (s1)->cmd==(s2)->cmd && \
-((s1)->dev < (s2)->dev || ((s1)->dev == (s2)->dev && \
-(s1)->sector < (s2)->sector)))
+((((s1)->cmd<(s2)->cmd) || ((s1)->cmd==(s2)->cmd)) && \
+(((s1)->dev < (s2)->dev) || ((s1)->dev == (s2)->dev)) && \
+((s1)->sector < (s2)->sector))
 
 struct blk_dev_struct {
 	void (*request_fn)(void);

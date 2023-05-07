@@ -138,9 +138,10 @@ int main(void)		/* This really IS void, no error here. */
 	sched_init();
 	printk("Scheduler initialised\n");
 	chr_dev_init();
-	printk("Character devices initialised\n");
-#if 0
+	printk("Character device framework initialised\n");
 	blk_dev_init();
+	printk("Block device framework initialised\n");
+#if 0
 	tty_init();
 	time_init();
 	buffer_init(buffer_memory_end);
