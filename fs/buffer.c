@@ -19,15 +19,15 @@
  */
 
 #include <stdarg.h>
+#include <string.h>
  
 #include <linux/config.h>
 #include <linux/sched.h>
 #include <linux/kernel.h>
 #include <asm/system.h>
-#include <asm/io.h>
 
-extern int end;
-struct buffer_head * start_buffer = (struct buffer_head *) &end;
+extern char __bss_end;
+struct buffer_head * start_buffer = (struct buffer_head *)&__bss_end;
 struct buffer_head * hash_table[NR_HASH];
 static struct buffer_head * free_list;
 static struct task_struct * buffer_wait = NULL;
@@ -46,7 +46,7 @@ int sys_sync(void)
 	int i;
 	struct buffer_head * bh;
 
-	sync_inodes();		/* write out inodes into buffers */
+//	sync_inodes();		/* write out inodes into buffers */ XXX
 	bh = start_buffer;
 	for (i=0 ; i<NR_BUFFERS ; i++,bh++) {
 		wait_on_buffer(bh);
@@ -69,7 +69,7 @@ int sync_dev(int dev)
 		if (bh->b_dev == dev && bh->b_dirt)
 			ll_rw_block(WRITE,bh);
 	}
-	sync_inodes();
+//	sync_inodes();				XXX
 	bh = start_buffer;
 	for (i=0 ; i<NR_BUFFERS ; i++,bh++) {
 		if (bh->b_dev != dev)
@@ -81,7 +81,7 @@ int sync_dev(int dev)
 	return 0;
 }
 
-void inline invalidate_buffers(int dev)
+static inline void invalidate_buffers(int dev)
 {
 	int i;
 	struct buffer_head * bh;
@@ -90,7 +90,7 @@ void inline invalidate_buffers(int dev)
 	for (i=0 ; i<NR_BUFFERS ; i++,bh++) {
 		if (bh->b_dev != dev)
 			continue;
-		wait_on_buffer(bh);
+		wait_on_buffer(bh);		// XXX
 		if (bh->b_dev == dev)
 			bh->b_uptodate = bh->b_dirt = 0;
 	}
@@ -112,6 +112,7 @@ void inline invalidate_buffers(int dev)
  */
 void check_disk_change(int dev)
 {
+#if 0
 	int i;
 
 	if (MAJOR(dev) != 2)
@@ -122,6 +123,7 @@ void check_disk_change(int dev)
 		if (super_block[i].s_dev == dev)
 			put_super(super_block[i].s_dev);
 	invalidate_inodes(dev);
+#endif
 	invalidate_buffers(dev);
 }
 
@@ -167,8 +169,9 @@ static struct buffer_head * find_buffer(int dev, int block)
 {		
 	struct buffer_head * tmp;
 
-	for (tmp = hash(dev,block) ; tmp != NULL ; tmp = tmp->b_next)
-		if (tmp->b_dev==dev && tmp->b_blocknr==block)
+	for (tmp = hash(dev,block); tmp != NULL; tmp = tmp->b_next)
+		if (tmp->b_dev == dev &&
+		    tmp->b_blocknr == (unsigned long int)block)
 			return tmp;
 	return NULL;
 }
@@ -189,7 +192,7 @@ struct buffer_head * get_hash_table(int dev, int block)
 			return NULL;
 		bh->b_count++;
 		wait_on_buffer(bh);
-		if (bh->b_dev == dev && bh->b_blocknr == block)
+		if (bh->b_dev == dev && bh->b_blocknr == (unsigned long int)block)
 			return bh;
 		bh->b_count--;
 	}
@@ -208,7 +211,7 @@ struct buffer_head * getblk(int dev,int block)
 	struct buffer_head * tmp, * bh;
 
 repeat:
-	if (bh = get_hash_table(dev,block))
+	if ((bh = get_hash_table(dev,block)))
 		return bh;
 	tmp = free_list;
 	do {
@@ -280,12 +283,7 @@ struct buffer_head * bread(int dev,int block)
 	return NULL;
 }
 
-#define COPYBLK(from,to) \
-__asm__("cld\n\t" \
-	"rep\n\t" \
-	"movsl\n\t" \
-	::"c" (BLOCK_SIZE/4),"S" (from),"D" (to) \
-	:"cx","di","si")
+#define COPYBLK(from,to) memcpy((void*)(to), (void*)(from), BLOCK_SIZE)
 
 /*
  * bread_page reads four buffers into memory at the desired address. It's
@@ -300,7 +298,7 @@ void bread_page(unsigned long address,int dev,int b[4])
 
 	for (i=0 ; i<4 ; i++)
 		if (b[i]) {
-			if (bh[i] = getblk(dev,b[i]))
+			if ((bh[i] = getblk(dev,b[i])))
 				if (!bh[i]->b_uptodate)
 					ll_rw_block(READ,bh[i]);
 		} else
@@ -347,15 +345,12 @@ struct buffer_head * breada(int dev,int first, ...)
 
 void buffer_init(long buffer_end)
 {
-	struct buffer_head * h = start_buffer;
-	void * b;
+	struct buffer_head * h = (struct buffer_head *)&__bss_end;
+	char* b;
 	int i;
 
-	if (buffer_end == 1<<20)
-		b = (void *) (640*1024);
-	else
-		b = (void *) buffer_end;
-	while ( (b -= BLOCK_SIZE) >= ((void *) (h+1)) ) {
+	b = (void *) buffer_end;
+	while ( (b -= BLOCK_SIZE) >= ((char *) (h+1)) ) {
 		h->b_dev = 0;
 		h->b_dirt = 0;
 		h->b_count = 0;
@@ -369,8 +364,6 @@ void buffer_init(long buffer_end)
 		h->b_next_free = h+1;
 		h++;
 		NR_BUFFERS++;
-		if (b == (void *) 0x100000)
-			b = (void *) 0xA0000;
 	}
 	h--;
 	free_list = start_buffer;
@@ -378,4 +371,4 @@ void buffer_init(long buffer_end)
 	h->b_next_free = free_list;
 	for (i=0;i<NR_HASH;i++)
 		hash_table[i]=NULL;
-}	
+}

@@ -16,7 +16,7 @@
 
 	.macro	save_context
 
-	addi		sp,		sp,		CONTEXT_SIZE
+	addi		sp,		sp,		-CONTEXT_SIZE
 	save(ra)
 	save(gp)
 	save(tp)
@@ -47,7 +47,7 @@
 	save(t4)
 	save(t5)
 	save(t6)
-	addi		t0,		sp,		-CONTEXT_SIZE
+	addi		t0,		sp,		CONTEXT_SIZE
 	sd		t0,		CONTEXT_sp(sp)
 
 	.endm
@@ -90,11 +90,14 @@
 
 	.align		4
 
+// TODO: Switch to kernel stack when dealing with an exception from userspace
 do_exception:
 	save_context
 	la		ra,		ret_from_exception
 	csrr		a0,		scause
-	mv		a1,		sp
+	csrr		a1,		sepc
+	csrr		a2,		stval
+	mv		a3,		sp
 	j		exception_handler
 
 ret_from_exception:

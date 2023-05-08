@@ -14,15 +14,20 @@
 #include <linux/head.h>
 #include <linux/sched.h>
 #include <linux/kernel.h>
+#include <linux/context.h>
 #include <asm/system.h>
 
 extern void do_exception(void);
 
-void exception_handler(unsigned long int scause, unsigned long int *regs)
+void exception_handler(unsigned long int scause, unsigned long int sepc,
+		       unsigned long int stval, unsigned long int *regs)
 {
 	(void)regs;
-	printk("Unhandled exception with scause = 0x%x", scause);
-	while (1) ;
+	printk("Unhandled exception with scause = 0x%x\n", scause);
+	printk("ra: 0x%016x\tsp: 0x%016x\n", CONTEXT_REG(regs, ra),
+	       CONTEXT_REG(regs, sp));
+	printk("sepc: 0x%016x\tstval: 0x%016x\n", sepc, stval);
+	panic("Unhandled exception.\n");
 	return;
 }
 

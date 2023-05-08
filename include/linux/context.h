@@ -1,7 +1,7 @@
 #ifndef __TRAP_H__
 #define __TRAP_H__
 
-#define CONTEXT_SIZE 272
+#define CONTEXT_SIZE 256
 
 #define CONTEXT_ra		0
 #define CONTEXT_sp		8
@@ -34,8 +34,7 @@
 #define CONTEXT_t4		224
 #define CONTEXT_t5		232
 #define CONTEXT_t6		240
-#define CONTEXT_SEPC		248
-#define CONTEXT_SCAUSE		256
-#define CONTEXT_STVAL		264	
+
+#define CONTEXT_REG(ctx, reg) ctx[CONTEXT_##reg / 8]
 
 #endif	// __TRAP_H__

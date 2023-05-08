@@ -141,10 +141,11 @@ int main(void)		/* This really IS void, no error here. */
 	printk("Character device framework initialised\n");
 	blk_dev_init();
 	printk("Block device framework initialised\n");
+	buffer_init(0x801fe000);	// Start of the page table
+	printk("Buffer initialised\n");
 #if 0
 	tty_init();
 	time_init();
-	buffer_init(buffer_memory_end);
 	hd_init();
 	floppy_init();
 	sti();
