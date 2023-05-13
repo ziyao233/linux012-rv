@@ -143,12 +143,12 @@ int main(void)		/* This really IS void, no error here. */
 	printk("Block device framework initialised\n");
 	buffer_init(0x801fe000);	// Start of the page table
 	printk("Buffer initialised\n");
+	sti();
 #if 0
 	tty_init();
 	time_init();
 	hd_init();
 	floppy_init();
-	sti();
 	move_to_user_mode();
 	if (!fork()) {		/* we count on this going ok */
 		init();
@@ -160,10 +160,9 @@ int main(void)		/* This really IS void, no error here. */
  * can run). For task0 'pause()' just means we go check if some other
  * task can run, and if not we return here.
  */
-	for(;;)
-		__asm__("int $0x80"::"a" (__NR_pause):"ax");
 #endif
-	while (1) ;
+	for(;;)
+		schedule();
 	return 0;		// Never reaches here
 }
 

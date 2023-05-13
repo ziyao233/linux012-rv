@@ -32,8 +32,8 @@ static int skip_atoi(const char **s)
 #define SPECIAL	32		/* 0x */
 #define SMALL	64		/* use 'abcdef' instead of 'ABCDEF' */
 
-static char * number(char * str, long int num, int base, int size, int precision
-	,int type)
+static char * number(char * str, unsigned long int num, int base, int size,
+		     int precision, int type)
 {
 	char c,sign,tmp[36];
 	const char *digits="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -44,7 +44,7 @@ static char * number(char * str, long int num, int base, int size, int precision
 	if (base<2 || base>36)
 		return 0;
 	c = (type & ZEROPAD) ? '0' : ' ' ;
-	if (type&SIGN && num<0) {
+	if (type&SIGN && (long int)num<0) {
 		sign='-';
 		num = -num;
 	} else

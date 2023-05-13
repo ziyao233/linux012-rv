@@ -20,14 +20,23 @@
 extern void do_exception(void);
 
 void exception_handler(unsigned long int scause, unsigned long int sepc,
-		       unsigned long int stval, unsigned long int *regs)
+		       unsigned long int stval, unsigned long int from,
+		       unsigned long int *regs)
 {
 	(void)regs;
-	printk("Unhandled exception with scause = 0x%x\n", scause);
-	printk("ra: 0x%016x\tsp: 0x%016x\n", CONTEXT_REG(regs, ra),
-	       CONTEXT_REG(regs, sp));
-	printk("sepc: 0x%016x\tstval: 0x%016x\n", sepc, stval);
-	panic("Unhandled exception.\n");
+	if (scause == 0x8000000000000001L) {
+		jiffies++;
+		printk("Timer: %lu\n", jiffies);
+		do_timer(from);
+		asm volatile("csrc sip, 2");
+	} else {
+		printk("Unhandled exception with scause = 0x%x\n", scause);
+		printk("ra: 0x%016x\tsp: 0x%016x\n", CONTEXT_REG(regs, ra),
+		       CONTEXT_REG(regs, sp));
+		printk("sepc: 0x%016x\tstval: 0x%016x\n", sepc, stval);
+		panic("Unhandled exception.\n");
+	}
+
 	return;
 }
 

@@ -12,7 +12,7 @@ __asm__ ("movl %%esp,%%eax\n\t" \
 	"mov %%ax,%%fs\n\t" \
 	"mov %%ax,%%gs" \
 	:::"ax")
-#define sti() asm("csrs sstatus, 1 << 1")
+#define sti() asm volatile ("csrs sstatus, 1 << 1")
 #define cli() asm("csrc sstatus, 1 << 1")
 #define nop() __asm__ ("nop"::)
 

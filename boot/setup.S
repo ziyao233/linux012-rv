@@ -50,10 +50,34 @@ _start:
 	csrw		medeleg,	t0
 	csrw		mideleg,	t0
 
+	/*	Initialise machine timer	*/
+	la		t0,		machine_timer_handler
+	csrw		mtvec,		t0
+	li		t0,		0x200BFF8
+	ld		t0,		0(t0)
+	li		t1,		0x2004000
+	ld		t0,		0(t1)
+	li		t2,		100000
+	add		t0,		t0,		t2
+	sd		t0,		0(t1)
+	la		t0,		mscratches
+	csrw		mscratch,	t0
+
+	/*	Setup exceptions	*/
+	csrr		t0,		mie
+	li		t1,		(1 << 7)	// MTIE
+	or		t0,		t1,		t0
+	csrw		mie,		t0
+
+	csrr		t0,		sie
+	li		t1,		(1 << 1)	// STIE
+	or		t0,		t1,		t0
+	csrw		sie,		t0
+
 	csrr		t0,		mstatus
 	li		t1,		~(3 << 11)
 	and		t0,		t1,		t0
-	li		t1,		1 << 11
+	li		t1,		(1 << 11)
 	or		t0,		t0,		t1
 	csrw		mstatus,	t0
 	la		t0,		main
@@ -63,6 +87,29 @@ _start:
 .park:
 	wfi
 	j		.park
+
+	.align		4
+machine_timer_handler:
+	csrrw		t0,		mscratch,		t0
+	sd		t1,		0(t0)
+	sd		t2,		8(t0)
+	sd		t3,		16(t0)
+
+	li		t3,		0x200BFF8
+	ld		t1,		0(t3)
+	li		t2,		100000
+	add		t1,		t1,			t2
+	li		t3,		0x2004000
+	sd		t1,		0(t3)
+
+	li		t1,		2			// SSIP
+	csrw		sip,		t1
+
+	ld		t1,		0(t0)
+	ld		t2,		8(t0)
+	ld		t3,		16(t0)
+	csrrw		t0,		mscratch,		t0
+	mret
 
 	.data
 pg_dir:
@@ -75,6 +122,8 @@ pg_dir_kernel:
 	.zero		4096 - 8
 
 	.bss
+mscratches:
+	.skip		32
 	.align		16
 	.skip 4096
 stack:
