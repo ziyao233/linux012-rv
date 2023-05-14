@@ -70,7 +70,7 @@ _start:
 	csrw		mie,		t0
 
 	csrr		t0,		sie
-	li		t1,		(1 << 1)	// STIE
+	li		t1,		(1 << 1)	// SSIE
 	or		t0,		t1,		t0
 	csrw		sie,		t0
 
@@ -95,11 +95,10 @@ machine_timer_handler:
 	sd		t2,		8(t0)
 	sd		t3,		16(t0)
 
-	li		t3,		0x200BFF8
+	li		t3,		0x2004000
 	ld		t1,		0(t3)
 	li		t2,		100000
 	add		t1,		t1,			t2
-	li		t3,		0x2004000
 	sd		t1,		0(t3)
 
 	li		t1,		2			// SSIP
@@ -119,11 +118,13 @@ pg_dir:
 	.zero		4096 - 3 * 8
 pg_dir_kernel:
 	.quad		0x2000000f	// 0x80000000 + 2MB -> 0x80000000
-	.zero		4096 - 8
+	.quad		0x2000001f	// 0x80100000 + 2MB -> 0x80000000
+					// User mode
+	.zero		4096 - 2 * 8
 
 	.bss
 mscratches:
 	.skip		32
 	.align		16
-	.skip 4096
+	.skip		4096
 stack:

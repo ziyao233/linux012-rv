@@ -116,6 +116,10 @@ static char * envp[] = { "HOME=/usr/root", NULL, NULL };
 
 struct drive_info { char dummy[32]; } drive_info;
 
+void pid0(void);
+
+#define user_addr(kaddr) ((void*)((unsigned long int)(kaddr) + 0x200000))
+
 int main(void)		/* This really IS void, no error here. */
 {			/* The startup routine assumes (well, ...) this */
 /*
@@ -144,6 +148,7 @@ int main(void)		/* This really IS void, no error here. */
 	buffer_init(0x801fe000);	// Start of the page table
 	printk("Buffer initialised\n");
 	sti();
+	move_to_user_mode(user_addr(pid0));
 #if 0
 	tty_init();
 	time_init();
@@ -161,9 +166,13 @@ int main(void)		/* This really IS void, no error here. */
  * task can run, and if not we return here.
  */
 #endif
-	for(;;)
-		schedule();
 	return 0;		// Never reaches here
+}
+
+void pid0(void)
+{
+	for(;;);
+	return;			// Never returns
 }
 
 #if 0

@@ -150,7 +150,7 @@ struct task_struct {
 /* math */	0, \
 /* fs info */	-1,0022,NULL,NULL,NULL,NULL,0, \
 /* filp */	{NULL,}, \
-/* context */   { 0 }  \
+/* context */   { .satp = (unsigned long int)pg_dir }  \
 }
 
 extern struct task_struct *task[NR_TASKS];

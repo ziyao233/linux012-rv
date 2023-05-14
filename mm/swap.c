@@ -32,7 +32,7 @@ bitop(bit,"")
 bitop(setbit,"s")
 bitop(clrbit,"r")
 
-static char * swap_bitmap = NULL;
+// static char * swap_bitmap = NULL;
 int SWAP_DEV = 0;
 
 /*
@@ -42,6 +42,8 @@ int SWAP_DEV = 0;
 #define FIRST_VM_PAGE (TASK_SIZE>>12)
 #define LAST_VM_PAGE (1024*1024)
 #define VM_PAGES (LAST_VM_PAGE - FIRST_VM_PAGE)
+
+#if 0
 
 static int get_swap_page(void)
 {
@@ -165,36 +167,40 @@ int swap_out(void)
 	return 0;
 }
 
+#endif
+
+int swap_out(void)
+{
+	return 0;		// No swapping now
+}
+
 /*
  * Get physical address of first (actually last :-) free page, and mark it
  * used. If no free pages left, return 0.
  */
 unsigned long get_free_page(void)
 {
-register unsigned long __res asm("ax");
-
+	register unsigned long res = 0;
 repeat:
-	__asm__("std ; repne ; scasb\n\t"
-		"jne 1f\n\t"
-		"movb $1,1(%%edi)\n\t"
-		"sall $12,%%ecx\n\t"
-		"addl %2,%%ecx\n\t"
-		"movl %%ecx,%%edx\n\t"
-		"movl $1024,%%ecx\n\t"
-		"leal 4092(%%edx),%%edi\n\t"
-		"rep ; stosl\n\t"
-		"movl %%edx,%%eax\n"
-		"1:"
-		:"=a" (__res)
-		:"0" (0),"i" (LOW_MEM),"c" (PAGING_PAGES),
-		"D" (mem_map+PAGING_PAGES-1)
-		:"di","cx","dx");
-	if (__res >= HIGH_MEMORY)
+	for (int i = PAGING_PAGES; i ; i--) {
+		if (!mem_map[i - 1]) {
+			res = LOW_MEM + ((i - 1) << 12);
+			break;
+		}
+	}
+
+	/*
+	 *	PAGING_PAGES maybe less than actually usable pages on
+	 *	old machines. Could not reach here on our port
+	 */
+	if (res >= HIGH_MEMORY)
 		goto repeat;
-	if (!__res && swap_out())
+	if (!res && swap_out())
 		goto repeat;
-	return __res;
+	return res;
 }
+
+#if 0
 
 void init_swapping(void)
 {
@@ -251,3 +257,5 @@ void init_swapping(void)
 	}
 	printk("Swap device ok: %d pages (%d bytes) swap-space\n\r",j,j*4096);
 }
+
+#endif

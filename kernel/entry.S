@@ -97,8 +97,9 @@ do_exception:
 	csrr		a0,		scause
 	csrr		a1,		sepc
 	csrr		a2,		stval
-	mv		a3,		zero
-	mv		a4,		sp
+	csrr		a3,		sstatus
+	mv		a4,		zero
+	mv		a5,		sp
 	j		exception_handler
 
 ret_from_exception:
