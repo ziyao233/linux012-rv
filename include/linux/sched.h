@@ -68,7 +68,6 @@ typedef int (*fn_ptr)();
 
 struct context_struct {
 	entry ra;
-	entry sp;
 	entry s0;
 	entry s1;
 	entry s2;
@@ -81,6 +80,7 @@ struct context_struct {
 	entry s9;
 	entry s10;
 	entry s11;
+	entry sp;
 	entry satp;
 };
 #undef entry
@@ -110,7 +110,6 @@ struct task_struct {
 	long utime,stime,cutime,cstime,start_time;
 	struct rlimit rlim[RLIM_NLIMITS]; 
 	unsigned int flags;	/* per process flags, defined below */
-	unsigned short used_math;
 /* file system info */
 	int tty;		/* -1 if no tty, so it must be signed */
 	unsigned short umask;
@@ -122,6 +121,7 @@ struct task_struct {
 	struct file * filp[NR_OPEN];
 /* tss for this task */
 	struct context_struct context;
+	unsigned long int kstack;	// Kernel stack
 };
 
 /*
@@ -147,10 +147,10 @@ struct task_struct {
 		  {0x7fffffff, 0x7fffffff}, {0x7fffffff, 0x7fffffff}, \
 		  {0x7fffffff, 0x7fffffff}, {0x7fffffff, 0x7fffffff}}, \
 /* flags */	0, \
-/* math */	0, \
 /* fs info */	-1,0022,NULL,NULL,NULL,NULL,0, \
 /* filp */	{NULL,}, \
-/* context */   { .satp = (unsigned long int)pg_dir }  \
+/* context */   { .satp = (unsigned long int)pg_dir }, \
+		0 \
 }
 
 extern struct task_struct *task[NR_TASKS];

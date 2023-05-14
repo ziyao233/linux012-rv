@@ -24,7 +24,7 @@ _start:
 	add		t0,		t0,		8
 	blt		t0,		t1,		.clear_bss
 
-	la		sp,		stack
+	la		sp,		pid0_stack
 
 	csrw		pmpcfg0,	0xf
 	li		t0,		0x3fffffffffffff
@@ -127,4 +127,4 @@ mscratches:
 	.skip		32
 	.align		16
 	.skip		4096
-stack:
+pid0_stack:

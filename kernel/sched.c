@@ -136,7 +136,8 @@ void schedule(void)
 				(*p)->counter = ((*p)->counter >> 1) +
 						(*p)->priority;
 	}
-	switch_to(&current->context, &task[next]->context);
+	if ((struct task_struct *)task + next != current)
+		switch_to(&current->context, &task[next]->context);
 }
 
 int sys_pause(void)
