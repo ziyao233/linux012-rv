@@ -171,7 +171,11 @@ int main(void)		/* This really IS void, no error here. */
 
 void pid0(void)
 {
-	for(;;);
+	for(;;) {
+		asm volatile("mv a7, %0\n\t"
+			     "ecall"::
+			     "r" (__NR_pause));
+	}
 	return;			// Never returns
 }
 

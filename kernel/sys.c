@@ -10,7 +10,8 @@
 #include <linux/tty.h>
 #include <linux/kernel.h>
 #include <linux/config.h>
-#include <asm/segment.h>
+#include <linux/sys.h>
+#include <linux/context.h>
 #include <sys/times.h>
 #include <sys/utsname.h>
 #include <sys/param.h>
@@ -131,6 +132,8 @@ int sys_ulimit()
 	return -ENOSYS;
 }
 
+#if 0
+
 int sys_time(long * tloc)
 {
 	int i;
@@ -142,6 +145,8 @@ int sys_time(long * tloc)
 	}
 	return i;
 }
+
+#endif
 
 /*
  * Unprivileged users may change the real user id to the effective uid
@@ -204,6 +209,8 @@ int sys_setuid(int uid)
 	return(0);
 }
 
+#if 0
+
 int sys_stime(long * tptr)
 {
 	if (!suser())
@@ -232,6 +239,7 @@ int sys_brk(unsigned long end_data_seg)
 		current->brk = end_data_seg;
 	return current->brk;
 }
+
 
 /*
  * This needs some heave checking ...
@@ -268,6 +276,8 @@ int sys_setpgid(int pid, int pgid)
 	return -ESRCH;
 }
 
+#endif
+
 int sys_getpgrp(void)
 {
 	return current->pgrp;
@@ -282,6 +292,8 @@ int sys_setsid(void)
 	current->tty = -1;
 	return current->pgrp;
 }
+
+#if 0
 
 /*
  * Supplementary group ID's
@@ -320,6 +332,8 @@ int sys_setgroups(int gidsetsize, gid_t *grouplist)
 	return 0;
 }
 
+#endif
+
 int in_group_p(gid_t grp)
 {
 	int	i;
@@ -336,9 +350,12 @@ int in_group_p(gid_t grp)
 	return 0;
 }
 
+#if 0
+
 static struct utsname thisname = {
 	UTS_SYSNAME, UTS_NODENAME, UTS_RELEASE, UTS_VERSION, UTS_MACHINE
 };
+
 
 int sys_uname(struct utsname * name)
 {
@@ -512,6 +529,8 @@ void adjust_clock()
 	startup_time += sys_tz.tz_minuteswest*60;
 }
 
+#endif
+
 int sys_umask(int mask)
 {
 	int old = current->umask;
@@ -520,3 +539,20 @@ int sys_umask(int mask)
 	return (old);
 }
 
+void do_syscall(unsigned long int *regs)
+{
+	int id = CONTEXT_REG(regs, a7);
+	if (id > NR_syscalls) {
+		CONTEXT_REG(regs, a0) = -ENOSYS;
+		return;
+	}
+
+	regs[CONTEXT_a0] =
+		((unsigned long int (*)(unsigned long int, unsigned long int,
+				       unsigned long int, unsigned long int))
+		sys_call_table[id])(CONTEXT_REG(regs, a0),
+				    CONTEXT_REG(regs, a1),
+				    CONTEXT_REG(regs, a2),
+				    CONTEXT_REG(regs, a3));
+	return;
+}

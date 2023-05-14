@@ -99,8 +99,9 @@ do_exception:
 	csrr		a1,		sepc
 	csrr		a2,		stval
 	csrr		a3,		sstatus
-	mv		a4,		zero
-	mv		a5,		sp
+	csrr		a4,		sscratch
+	mv		a5,		zero
+	mv		a6,		sp
 	j		exception_handler
 
 ret_from_exception:
@@ -109,21 +110,26 @@ ret_from_exception:
 	sret
 
 	/*
-	 *	0(sscratch): current->kstack
+	 *	sscratch: current->kstack
 	 */
 do_user_exception:
 	csrrw		sp,		sscratch,		sp
 	save_context
+	la		t0,		do_exception
+	csrw		stvec,		t0
 	la		ra,		ret_from_user_exception
 	csrr		a0,		scause
 	csrr		a1,		sepc
 	csrr		a2,		stval
 	csrr		a3,		sstatus
-	li		a4,		1
-	mv		a5,		sp
+	csrr		a4,		sscratch
+	li		a5,		1
+	mv		a6,		sp
 	j		exception_handler
 
 ret_from_user_exception:
+	la		t0,		do_user_exception
+	csrw		stvec,		t0
 	restore_context
 	ld		sp,		CONTEXT_sp(sp)
 	csrrw		sp,		sscratch,		sp

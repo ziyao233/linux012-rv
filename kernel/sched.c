@@ -12,7 +12,6 @@
  */
 #include <linux/sched.h>
 #include <linux/kernel.h>
-#include <linux/sys.h>
 #include <linux/fdreg.h>
 #include <asm/system.h>
 
@@ -76,13 +75,6 @@ struct task_struct *current = &(init_task.task);
 struct task_struct *last_task_used_math = NULL;
 
 struct task_struct * task[NR_TASKS] = {&(init_task.task), };
-
-long user_stack [ PAGE_SIZE>>2 ] ;
-
-struct {
-	long * a;
-	short b;
-	} stack_start = { & user_stack [PAGE_SIZE>>2] , 0x10 };
 
 /*
  *  'schedule()' is the scheduler function. This is GOOD CODE! There

@@ -62,7 +62,7 @@ extern void trap_init(void);
 extern void panic(const char * str);
 extern int tty_write(unsigned minor,char * buf,int count);
 
-typedef int (*fn_ptr)();
+typedef unsigned long int fn_ptr;
 
 #define entry unsigned long int
 
@@ -82,6 +82,7 @@ struct context_struct {
 	entry s11;
 	entry sp;
 	entry satp;
+	entry kstack;
 };
 #undef entry
 
@@ -121,7 +122,6 @@ struct task_struct {
 	struct file * filp[NR_OPEN];
 /* tss for this task */
 	struct context_struct context;
-	unsigned long int kstack;	// Kernel stack
 };
 
 /*
@@ -150,7 +150,6 @@ struct task_struct {
 /* fs info */	-1,0022,NULL,NULL,NULL,NULL,0, \
 /* filp */	{NULL,}, \
 /* context */   { .satp = (unsigned long int)pg_dir }, \
-		0 \
 }
 
 extern struct task_struct *task[NR_TASKS];

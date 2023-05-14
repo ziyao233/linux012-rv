@@ -23,29 +23,34 @@ void do_timer(int cpl);
 
 void exception_handler(unsigned long int scause, unsigned long int sepc,
 		       unsigned long int stval, unsigned long int sstatus,
-		       unsigned long int from, unsigned long int *regs)
+		       unsigned long int sscratch, unsigned long int from,
+		       unsigned long int *regs)
 {
 	int restore = 0;
 	(void)regs;
 	if (scause == 0x8000000000000001L) {
 		jiffies++;
 		asm volatile("csrc sip, 2");
-		printk("Timer\n");
 		do_timer(from);
 		restore = 1;
+	} else if (scause == 0x8L) {
+		restore = 1;
+		do_syscall(regs);
 	} else {
 		printk("Unhandled exception with scause = 0x%x\n", scause);
 		printk("ra: 0x%016x\tsp: 0x%016x\n", CONTEXT_REG(regs, ra),
 		       CONTEXT_REG(regs, sp));
 		printk("sepc: 0x%016x\tstval: 0x%016x\n", sepc, stval);
-		printk("sstatus: 0x%016x\n", sstatus);
+		printk("sstatus: 0x%016x\tsscratch: 0x%016x\n",
+		       sstatus, sscratch);
 		panic("Unhandled exception.\n");
 	}
 
 	if (restore) {
-		asm volatile("csrw sstatus, %0\n\t"
-			     "csrw sepc, %1" : :
-			     "r" (sstatus), "r" (sepc));
+		asm volatile("csrw sepc, %0\n\t"
+			     "csrw sscratch, %1\n\t"
+			     "csrw sstatus, %2" : :
+			     "r" (sepc), "r" (sscratch),  "r" (sstatus));
 	}
 
 	return;

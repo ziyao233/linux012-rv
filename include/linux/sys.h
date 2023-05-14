@@ -2,6 +2,12 @@
  * Why isn't this a .c file?  Enquiring minds....
  */
 
+#define __LIBRARY__
+
+#include <unistd.h>
+
+#undef __LIBRARY__
+
 extern int sys_setup();
 extern int sys_exit();
 extern int sys_fork();
@@ -89,6 +95,14 @@ extern int sys_symlink();
 extern int sys_lstat();
 extern int sys_readlink();
 extern int sys_uselib();
+
+#define dc(name) [__NR_##name] = (fn_ptr)sys_##name
+
+fn_ptr sys_call_table[] = {
+	dc(pause)
+};
+
+int NR_syscalls = sizeof(sys_call_table) / sizeof(fn_ptr);
 
 #if 0
 

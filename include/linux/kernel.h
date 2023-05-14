@@ -18,6 +18,7 @@ extern void blank_screen(void);
 extern void unblank_screen(void);
 size_t vsprintf(char *buf, const char *fmt, va_list args);
 size_t sprintf(char *buf, const char *fmt, ...);
+void do_syscall(unsigned long int *regs);
 
 extern int beepcount;
 extern int hd_timeout;
