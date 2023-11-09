@@ -9,7 +9,7 @@ asm volatile("csrc	sstatus, %0\n\t"		\
 	     "add	sp, sp, %2\n\t"			\
 	     "csrw	stvec, %4\n\t"			\
 	     "sret" : :					\
-	     "r" (1 << 8), "r" (f), "r" (0x200000),	\
+	     "r" (1 << 8), "r" (f), "r" (0x40000000),	\
 	     "r" (&current->context.kstack),		\
 	     "r" (do_user_exception):			\
 	     "t0")

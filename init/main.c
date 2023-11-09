@@ -118,7 +118,7 @@ struct drive_info { char dummy[32]; } drive_info;
 
 void pid0(void);
 
-#define user_addr(kaddr) ((void*)((unsigned long int)(kaddr) + 0x200000))
+#define user_addr(kaddr) ((void*)((unsigned long int)(kaddr) + 0x40000000))
 
 int main(void)		/* This really IS void, no error here. */
 {			/* The startup routine assumes (well, ...) this */

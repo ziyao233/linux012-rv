@@ -114,13 +114,9 @@ machine_timer_handler:
 pg_dir:
 	.quad		0x7		// 0 + 1G -> 0
 	.quad		0x10000007	// 0x40000000 + 1G -> 0x40000000
-	.quad		0x2007fc01	// 0x80000000 + 1G dir: 0x801f0000
-	.zero		4096 - 3 * 8
-pg_dir_kernel:
-	.quad		0x2000000f	// 0x80000000 + 2MB -> 0x80000000
-	.quad		0x2000001f	// 0x80100000 + 2MB -> 0x80000000
-					// User mode
-	.zero		4096 - 2 * 8
+	.quad		0x2000000f	// 0x80000000 + 1G -> 0x80000000
+	.quad		0x2000001f	// 0x80000000 + 1G -> 0xc0000000
+	.zero		4096 - 4 * 8
 
 	.bss
 mscratches:
