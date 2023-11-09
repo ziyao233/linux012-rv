@@ -51,9 +51,9 @@ OBJS		= $(patsubst %.S, %.o, $(patsubst %.c, %.o, $(SRCS)))
 .c.o:
 	$(CC) $(CFLAGS) -c -o $*.o $<
 
-all: kernel
+all: kernel.elf
 
-kernel: $(OBJS)
+kernel.elf: $(OBJS)
 	$(LD) $(LDFLAGS) $(OBJS) -o kernel.elf
 
 clean:
